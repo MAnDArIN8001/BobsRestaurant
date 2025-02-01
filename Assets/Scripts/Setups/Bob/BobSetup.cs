@@ -7,5 +7,6 @@ namespace Setups.Bob
     {
         [field: SerializeField] public float MovementSpeed { get; private set; }
         [field: SerializeField] public float JumpForce { get; private set; }
+        [field: SerializeField, Space] public float Sensitivity { get; private set; }
     }
 }
