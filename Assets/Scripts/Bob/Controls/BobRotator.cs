@@ -8,10 +8,10 @@ namespace Bob.Controls
     public class BobRotator : MonoBehaviour
     {
         public event Action<Vector2> OnRotationCompute;
+        
+        private float _currentCameraRotationAngel;
 
         [SerializeField] private Utiles.Range _viewRange;
-
-        private float _currentCameraRotationAngel;
 
         [Space, SerializeField] private Transform _cameraRoot;
 
@@ -37,25 +37,32 @@ namespace Bob.Controls
                 OnRotationCompute?.Invoke(inputValues);
             }
             
-            Rotate(inputValues);
-
+            RotateHorizontal(inputValues);
+            RotateVertical(inputValues);
+            
             _lastInput = inputValues;
         }
 
-        private void Rotate(Vector2 input)
+        private void RotateHorizontal(Vector2 input)
         {
-            var sensitivity = _setup.Sensitivity;
-            
-            transform.Rotate(0, input.normalized.x * sensitivity, 0);
+            var sensitivity = _setup.HorizontalSensitivity;
 
-            if (input.y != 0)
-            {
-                _currentCameraRotationAngel += (-input.y) * sensitivity * Time.deltaTime;
-                _currentCameraRotationAngel = Mathf.Clamp(_currentCameraRotationAngel, _viewRange.MinValue, _viewRange.MaxValue);
-
-                _cameraRoot.localRotation = Quaternion.Euler(_currentCameraRotationAngel, 0, 0);
-            }
+            float targetYRotation = transform.eulerAngles.y + input.x * sensitivity;
+            float smoothedYRotation = Mathf.LerpAngle(transform.eulerAngles.y, targetYRotation, Time.deltaTime * 10f);
+                
+            transform.rotation = Quaternion.Euler(0, smoothedYRotation, 0);
         }
+
+        private void RotateVertical(Vector2 input)
+        {
+            var sensitivity = _setup.VerticalSensitivity;
+            
+            _currentCameraRotationAngel += (-input.y) * sensitivity * Time.deltaTime;
+            _currentCameraRotationAngel = Mathf.Clamp(_currentCameraRotationAngel, _viewRange.MinValue, _viewRange.MaxValue);
+
+            _cameraRoot.localRotation = Quaternion.Euler(_currentCameraRotationAngel, 0, 0);
+        }
+        
         private Vector2 ReadInputValues() => _input.Mouse.Delta.ReadValue<Vector2>();
     }
 }
