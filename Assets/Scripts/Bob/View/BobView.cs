@@ -14,6 +14,7 @@ public class BobView : MonoBehaviour
     #region BobComponents
 
     private BobMovement _movement;
+    private BobJump _jumper;
     
     #endregion
 
@@ -21,6 +22,7 @@ public class BobView : MonoBehaviour
     {
         _animator = GetComponent<Animator>();
         _movement = GetComponent<BobMovement>();
+        _jumper = GetComponent<BobJump>();
     }
 
     private void OnEnable()
@@ -28,6 +30,11 @@ public class BobView : MonoBehaviour
         if (_movement is not null)
         {
             _movement.OnMovementCompute += HandleMovementCompute;
+        }
+
+        if (_jumper is not null)
+        {
+            _jumper.OnGroundedStateChanged += HandleGroundedStateChanged;
         }
     }
     
@@ -37,11 +44,21 @@ public class BobView : MonoBehaviour
         {
             _movement.OnMovementCompute -= HandleMovementCompute;
         }
+        
+        if (_jumper is not null)
+        {
+            _jumper.OnGroundedStateChanged -= HandleGroundedStateChanged;
+        }
     }
 
     private void HandleMovementCompute(Vector2 obj)
     {
         _animator.SetFloat(_horizontalMovementKey, obj.x);
         _animator.SetFloat(_verticalMovementKey, obj.y);
+    }
+
+    private void HandleGroundedStateChanged(bool newGroundedState)
+    {
+        _animator.SetBool(_jumpKey, newGroundedState);
     }
 }

@@ -40,6 +40,8 @@ namespace Bob.Controls
             {
                 OnMovementCompute?.Invoke(input);
             }
+            
+            Debug.Log(_rigidbody.linearVelocity);
 
             _lastInput = input;
         }
@@ -47,14 +49,16 @@ namespace Bob.Controls
         private void Move(Vector2 input)
         {
             Vector3 movementVelocity = ComputeInputOnMovement(input);
+            
+            movementVelocity *= _setup.MovementSpeed;
+            movementVelocity.y = _rigidbody.linearVelocity.y;
 
-            _rigidbody.linearVelocity = movementVelocity * _setup.MovementSpeed;
+            _rigidbody.linearVelocity = movementVelocity;
         }
 
         private Vector3 ComputeInputOnMovement(Vector2 input)
         {
             var movementVelocity = transform.forward * input.y + transform.right * input.x;
-            movementVelocity.y = _rigidbody.linearVelocity.y;
 
             return movementVelocity.normalized;
         }
