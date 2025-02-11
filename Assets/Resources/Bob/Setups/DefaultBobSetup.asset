@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: DefaultBobSetup
   m_EditorClassIdentifier: 
   <MovementSpeed>k__BackingField: 5
-  <JumpForce>k__BackingField: 5
-  <HorizontalSensitivity>k__BackingField: 3
-  <VerticalSensitivity>k__BackingField: 25
+  <JumpForce>k__BackingField: 4
+  <HorizontalSensitivity>k__BackingField: 1
+  <VerticalSensitivity>k__BackingField: 20
