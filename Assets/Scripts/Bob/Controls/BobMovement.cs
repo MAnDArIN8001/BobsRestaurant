@@ -2,23 +2,26 @@ using System;
 using Setups.Bob;
 using TMPro;
 using UnityEngine;
+using Utiles;
 using Zenject;
 
 namespace Bob.Controls
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class BobMovement : MonoBehaviour
+    public class BobMovement : MonoBehaviour, IStatable
     {
         public event Action<Vector2> OnMovementCompute;
 
+        private bool _enabled;
+
         private Vector2 _lastInput;
+        
+        private Rigidbody _rigidbody;
         
         private BaseInput _input;
 
-        private Rigidbody _rigidbody;
-
         private BobSetup _setup;
-        
+
         public void Initialize(BaseInput input, BobSetup setup)
         {
             _input = input;
@@ -32,6 +35,11 @@ namespace Bob.Controls
 
         private void Update()
         {
+            if (!_enabled)
+            {
+                return;
+            }
+            
             Vector2 input = ReadMovementInput();
             
             Move(input);
@@ -47,18 +55,30 @@ namespace Bob.Controls
         private void Move(Vector2 input)
         {
             Vector3 movementVelocity = ComputeInputOnMovement(input);
+            
+            movementVelocity *= _setup.MovementSpeed;
+            movementVelocity.y = _rigidbody.linearVelocity.y;
 
-            _rigidbody.linearVelocity = movementVelocity * _setup.MovementSpeed;
+            _rigidbody.linearVelocity = movementVelocity;
         }
 
         private Vector3 ComputeInputOnMovement(Vector2 input)
         {
             var movementVelocity = transform.forward * input.y + transform.right * input.x;
-            movementVelocity.y = _rigidbody.linearVelocity.y;
 
             return movementVelocity.normalized;
         }
 
         private Vector2 ReadMovementInput() => _input.Controls.Movement.ReadValue<Vector2>();
+        
+        public void Enable()
+        {
+            _enabled = true;
+        }
+
+        public void Disable()
+        {
+            _enabled = false;
+        }
     }
 }
