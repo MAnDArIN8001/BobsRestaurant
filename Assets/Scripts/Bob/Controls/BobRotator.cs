@@ -1,13 +1,16 @@
 ﻿using System;
 using Setups.Bob;
 using UnityEngine;
+using Utiles;
 using Zenject;
 
 namespace Bob.Controls
 {
-    public class BobRotator : MonoBehaviour
+    public class BobRotator : MonoBehaviour, IStatable
     {
         public event Action<Vector2> OnRotationCompute;
+
+        private bool _enabled;
         
         private float _currentCameraRotationAngel;
 
@@ -21,8 +24,7 @@ namespace Bob.Controls
 
         private BobSetup _setup;
 
-        [Inject]
-        private void Initialize(BaseInput input, BobSetup setup)
+        public void Initialize(BaseInput input, BobSetup setup)
         {
             _input = input;
             _setup = setup;
@@ -30,6 +32,11 @@ namespace Bob.Controls
 
         private void Update()
         {
+            if (!_enabled)
+            {
+                return;
+            }
+            
             var inputValues = ReadInputValues();
 
             if (inputValues != _lastInput)
@@ -64,5 +71,15 @@ namespace Bob.Controls
         }
         
         private Vector2 ReadInputValues() => _input.Mouse.Delta.ReadValue<Vector2>();
+        
+        public void Enable()
+        {
+            _enabled = true;
+        }
+
+        public void Disable()
+        {
+            _enabled = false;
+        }
     }
 }

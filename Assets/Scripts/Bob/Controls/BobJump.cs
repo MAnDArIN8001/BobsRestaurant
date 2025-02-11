@@ -2,16 +2,17 @@ using System;
 using Setups.Bob;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Zenject;
+using Utiles;
 
 namespace Bob.Controls
 {
     [RequireComponent(typeof(Rigidbody))]
-    public class BobJump : MonoBehaviour
+    public class BobJump : MonoBehaviour, IStatable
     {
         public event Action<bool> OnGroundedStateChanged;
-        
+
         private bool _isOnGround;
+        private bool _enabled;
 
         [SerializeField] private float _groundCheckDistance;
 
@@ -22,9 +23,8 @@ namespace Bob.Controls
         private BaseInput _input;
 
         private BobSetup _setup;
-
-        [Inject]
-        private void Initialize(BaseInput input, BobSetup setup)
+        
+        public void Initialize(BaseInput input, BobSetup setup)
         {
             _input = input;
             _setup = setup;
@@ -64,7 +64,7 @@ namespace Bob.Controls
 
         private void HandleJump(InputAction.CallbackContext obj)
         {
-            if (!_isOnGround)
+            if (!_isOnGround || !_enabled)
             {
                 return;
             }
@@ -78,10 +78,19 @@ namespace Bob.Controls
 
         private void Jump()
         {
-            Debug.Log("Jumped");
             _rigidbody.AddForce(transform.up * _setup.JumpForce, ForceMode.Impulse);
 
             OnGroundedStateChanged?.Invoke(_isOnGround);
+        }
+        
+        public void Enable()
+        {
+            _enabled = true;
+        }
+
+        public void Disable()
+        {
+            _enabled = false;
         }
     }
 }
