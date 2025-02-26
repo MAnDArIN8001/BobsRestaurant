@@ -26,6 +26,8 @@ namespace Bob.Controls
         {
             _input = input;
             _setup = setup;
+
+            _enabled = true;
         }
 
         private void Awake()

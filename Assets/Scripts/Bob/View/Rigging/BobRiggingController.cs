@@ -36,9 +36,7 @@ public class BobRiggingController : MonoBehaviour
     {
         if (other.TryGetComponent<ICommunicatable>(out var comunicatable))
         {
-            var handPosition = comunicatable.HandPosition;
 
-            _rightHandPosition = handPosition;
         }
     }
 
