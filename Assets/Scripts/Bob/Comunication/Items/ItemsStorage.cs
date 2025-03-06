@@ -1,26 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using Comunication.Pickable;
-using UnityEditor.Searcher;
 using UnityEngine;
 
 namespace Bob.Comunication.Items
 {
-    public class ItemsStorage<T>
+    public class ItemsStorage<T> : IDisposable
     {
+        public event Action<T> OnReceiveItem;
+        public event Action<T> OnDropItem;
+        
         private int _maxCapacity;
         
-        private List<T> _itemList;
+        private readonly List<T> _itemList;
 
         public bool IsFull => _itemList.Count == _maxCapacity;
 
         public IReadOnlyList<T> ItemsList => _itemList;
 
-        public ItemsStorage(int capacity, int maxCapacity)
+        public ItemsStorage(int maxCapacity)
         {
             _maxCapacity = maxCapacity;
             
-            _itemList = new List<T>(capacity);
+            _itemList = new List<T>(maxCapacity);
         }
 
         public bool TryAddItem(T newItem)
@@ -40,6 +42,8 @@ namespace Bob.Comunication.Items
             }
             
             _itemList.Add(newItem);
+            
+            OnReceiveItem?.Invoke(newItem);
 
             return true;
         }
@@ -55,6 +59,8 @@ namespace Bob.Comunication.Items
 
             _itemList.Remove(item);
 
+            OnDropItem?.Invoke(item);
+            
             return true;
         }
 
@@ -72,6 +78,13 @@ namespace Bob.Comunication.Items
             item = _itemList.Last();
 
             return true;
+        }
+
+        public bool Contains(T item) => _itemList.Contains(item);
+
+        public void Dispose()
+        {
+            _itemList.Clear();
         }
     }
 }

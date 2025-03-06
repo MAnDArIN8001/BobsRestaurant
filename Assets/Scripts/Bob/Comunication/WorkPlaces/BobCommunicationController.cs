@@ -1,5 +1,5 @@
 using System;
-using Comunication.ComunicatableObjects;
+using Communication.ComunicatableObjects;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utiles.EventSystem;
@@ -33,9 +33,9 @@ namespace Bob.Comunication
                 
                 OnReachCommunicatable?.Invoke();
 
-                var action = new CommunicationStateUpdateEvent((object)this, EventPriority.High, CommunicationEventType.Initialize, StartCommunicationWithWorkSpace);
+                var action = new CommunicationStateEvent((object)this, EventPriority.High, CommunicationEventType.Initialize, StartCommunicationWithWorkSpace);
                 
-                _eventBus.Publish<CommunicationStateUpdateEvent>(action);
+                _eventBus.Publish<CommunicationStateEvent>(action);
             }
         }
 
@@ -47,9 +47,9 @@ namespace Bob.Comunication
                 
                 OnLostCommunicatable?.Invoke();
                 
-                var action = new CommunicationStateUpdateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StartCommunicationWithWorkSpace);
+                var action = new CommunicationStateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StartCommunicationWithWorkSpace);
                 
-                _eventBus.Publish<CommunicationStateUpdateEvent>(action);
+                _eventBus.Publish<CommunicationStateEvent>(action);
             }
         }
 
@@ -59,11 +59,11 @@ namespace Bob.Comunication
 
             _isInProcess = true;
             
-            var action = new CommunicationStateUpdateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StartCommunicationWithWorkSpace);
+            var action = new CommunicationStateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StartCommunicationWithWorkSpace);
             
             _eventBus.Publish(action);
 
-            action = new CommunicationStateUpdateEvent((object)this, EventPriority.High, CommunicationEventType.Initialize, StopCommunicationWithWorkSpace);
+            action = new CommunicationStateEvent((object)this, EventPriority.High, CommunicationEventType.Initialize, StopCommunicationWithWorkSpace);
             
             _eventBus.Publish(action);
         }
@@ -74,7 +74,7 @@ namespace Bob.Comunication
 
             _isInProcess = false;
             
-            var action = new CommunicationStateUpdateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StopCommunicationWithWorkSpace);
+            var action = new CommunicationStateEvent((object)this, EventPriority.High, CommunicationEventType.Remove, StopCommunicationWithWorkSpace);
             
             _eventBus.Publish(action);
         }

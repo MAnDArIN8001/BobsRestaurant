@@ -1,51 +1,53 @@
-using System;
-using Comunication.ComunicatableObjects;
+using DG.Tweening;
 using UnityEngine;
 using UnityEngine.Animations.Rigging;
 
-public class BobRiggingController : MonoBehaviour
+namespace Bob.View.Rigging
 {
-    private bool _isRightHandEnabled;
-    private bool _isLeftHandEnabled;
-    
-    [Header("Right Hand")] 
-    [SerializeField] private Transform _rightHandIKTarget;
-    [SerializeField] private TwoBoneIKConstraint _rightHandConstraint;
-    
-    private Transform _rightHandPosition;
-
-    [Space, Header("Left Hand")] 
-    [SerializeField] private Transform _leftHandIKTarget;
-    [SerializeField] private TwoBoneIKConstraint _leftHandConstraint;
-
-    private Transform _leftHandPosition;
-
-    [Space, Header("Root For Comunicatables")] 
-    [SerializeField] private Transform _rootForComunicatablees;
-
-    private void Update()
+    public class BobRiggingController : MonoBehaviour
     {
-        if (_rightHandPosition is not null)
+        [Header("Right Hand")] 
+        [SerializeField] private Transform _rightHandIKTarget;
+        [SerializeField] private TwoBoneIKConstraint _rightHandConstraint;
+
+        [Space, SerializeField] private ConstraintAnimation _rightHandConstraintAnimation;
+
+        [Space, Header("Left Hand")] 
+        [SerializeField] private Transform _leftHandIKTarget;
+        [SerializeField] private TwoBoneIKConstraint _leftHandConstraint;
+
+        [Space, SerializeField] private ConstraintAnimation _leftHandConstraintAnimation;
+
+        private void OnDestroy()
         {
-            _rightHandConstraint.weight = 1f;
-            _rightHandIKTarget.position = _rightHandPosition.position;
+            _rightHandConstraintAnimation.Dispose();
+            _leftHandConstraintAnimation.Dispose();
         }
-    }
 
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.TryGetComponent<ICommunicatable>(out var comunicatable))
+        public void SetRightHandRoot(Transform newRoot)
         {
-
+            _rightHandIKTarget.position = newRoot.position;
+            _rightHandIKTarget.rotation = newRoot.rotation;
+            
+            _rightHandConstraintAnimation?.Play(1);
         }
-    }
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (other.transform == _rightHandPosition)
+        public void DisableRightHandIK()
         {
-            _rightHandPosition = null;
-            _rightHandConstraint.weight = 0f;
+            _rightHandConstraintAnimation.Play(0);
+        }
+
+        public void SetLeftHandRoot(Transform newRoot)
+        {
+            _leftHandIKTarget.position = newRoot.position;
+            _leftHandIKTarget.rotation = newRoot.rotation;
+            
+            _leftHandConstraintAnimation.Play(1);
+        }
+
+        public void DisableLeftHandIK()
+        {
+            _leftHandConstraintAnimation.Play(0);
         }
     }
 }

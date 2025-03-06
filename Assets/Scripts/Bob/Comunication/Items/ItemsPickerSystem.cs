@@ -1,5 +1,6 @@
-﻿using Bob.Comunication.Raycating;
-using Comunication.Pickable;
+﻿using System;
+using Bob.Comunication.Raycating;
+using Communication.ManipulatableObjects;
 using UnityEngine;
 using Utiles.EventSystem;
 using Utiles.EventSystem.EventTypes;
@@ -8,19 +9,25 @@ namespace Bob.Comunication.Items
 {
     public class ItemsPickerSystem : MonoBehaviour
     {
+        public event Action<IBaseItem> OnPickItem;
+        
         [SerializeField] private int _maxStorageCapacity;
         
-        private IPickable _pickableInViewRange;
+        private IBaseItem _pickableInViewRange;
         
         private EventBus _eventBus;
         
-        private ItemsStorage<IPickable> _itemsStorage;
+        private ItemsStorage<IBaseItem> _itemsStorage;
+
+        [Space, SerializeField] private Transform _root;
+        [SerializeField] private Transform _itemRoot;
 
         [Space, SerializeField] private DirectionalRaycaster _forwardRaycaster;
 
-        public void Initialize(EventBus eventBus)
+        public void Initialize(EventBus eventBus, ItemsStorage<IBaseItem> itemsStorage)
         {
             _eventBus = eventBus;
+            _itemsStorage = itemsStorage;
         }
 
         private void OnEnable()
@@ -43,19 +50,23 @@ namespace Bob.Comunication.Items
 
         private void HandleStopHitting()
         {
-            
+            if (_pickableInViewRange is not null)
+            {
+                _pickableInViewRange = null;
+                
+                var action = new CommunicationStateEvent((object)this, EventPriority.Medium, CommunicationEventType.Remove, PickUp);
+                
+                _eventBus.Publish(action);
+            }
         }
 
         private void HandleForwardHit(RaycastHit hitInfo)
         {
-            if (!hitInfo.collider.TryGetComponent<IPickable>(out var pickable))
+            if (!hitInfo.collider.TryGetComponent<IBaseItem>(out var pickable))
             {
-                return;
-            }
+                HandleStopHitting();
 
-            if (_pickableInViewRange != pickable)
-            {
-                _pickableInViewRange = pickable;
+                return;
             }
 
             if (_itemsStorage.IsFull)
@@ -63,7 +74,14 @@ namespace Bob.Comunication.Items
                 return;
             }
 
-            var action = new CommunicationStateUpdateEvent((object)this, EventPriority.Medium, CommunicationEventType.Initialize, PickUp);
+            if (_pickableInViewRange != pickable)
+            {
+                _pickableInViewRange = pickable;
+
+                var action = new CommunicationStateEvent((object)this, EventPriority.Medium, CommunicationEventType.Initialize, PickUp);
+            
+                _eventBus.Publish<CommunicationStateEvent>(action);   
+            }
         }
 
         private void PickUp()
@@ -72,8 +90,13 @@ namespace Bob.Comunication.Items
             {
                 return;
             }
+
+            _pickableInViewRange.PickUp(_itemRoot);
+            _itemsStorage.TryAddItem(_pickableInViewRange);
             
-            _pickableInViewRange.PickUp(transform);
+            OnPickItem?.Invoke(_pickableInViewRange);
+
+            _pickableInViewRange = null;
         }
     }
 }

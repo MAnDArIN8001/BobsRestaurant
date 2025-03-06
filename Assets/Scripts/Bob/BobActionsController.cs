@@ -14,16 +14,16 @@ namespace Bob
 
         private readonly EventBus _eventBus;
 
-        private List<CommunicationStateUpdateEvent> _actions;
+        private List<CommunicationStateEvent> _actions;
 
         public BobActionsController(InputAction input, EventBus eventBus)
         {
             _inputAction = input;
             _eventBus = eventBus;
 
-            _actions = new List<CommunicationStateUpdateEvent>();
+            _actions = new List<CommunicationStateEvent>();
             
-            _eventBus.Subscribe<CommunicationStateUpdateEvent>(HandleAction);
+            _eventBus.Subscribe<CommunicationStateEvent>(HandleAction);
 
             _inputAction.performed += HandleInputAction;
         }
@@ -40,7 +40,7 @@ namespace Bob
             actionToCall.CallBack?.Invoke();
         }
 
-        private void HandleAction(CommunicationStateUpdateEvent action)
+        private void HandleAction(CommunicationStateEvent action)
         {
             switch (action.Type)
             {
@@ -58,7 +58,7 @@ namespace Bob
             }
         }
 
-        private void InitializeNewAction(CommunicationStateUpdateEvent action)
+        private void InitializeNewAction(CommunicationStateEvent action)
         {
             if (_actions.Any(item => item.CallBack == action.CallBack))
             {
@@ -66,13 +66,13 @@ namespace Bob
 
                 return;
             }
-            
+
             _actions.Add(action);
 
             _actions.Sort((action, nextAction) => nextAction.EventPriority.CompareTo(action.EventPriority));
         }
 
-        private void RemoveAction(CommunicationStateUpdateEvent action)
+        private void RemoveAction(CommunicationStateEvent action)
         {
             var actionToRemove = _actions.FirstOrDefault(item => item.CallBack == action.CallBack);
             
@@ -88,7 +88,7 @@ namespace Bob
 
         public void Dispose()
         {
-            _eventBus.Unsubscribe<CommunicationStateUpdateEvent>(HandleAction);
+            _eventBus.Unsubscribe<CommunicationStateEvent>(HandleAction);
 
             _inputAction.performed -= HandleInputAction;
             
